@@ -20,10 +20,9 @@ const char* ssid = SECRET_SSID;
 const char* password =  SECRET_PASS;
 
 //Your coordinates
-const float latitude = 00.00;
-const float longitude = 00.00;
-const float myAltitude = 100.00;
-
+const float latitude = LATITUDE;
+const float longitude = LONGITUDE;
+const float myAltitude = ALTITUDE;
 
 // 'iss', 128x32px
 const unsigned char iss [] PROGMEM = {
@@ -61,24 +60,18 @@ const unsigned char iss [] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-
-
-
 //Variables for time and duration
 long riseTime = 0;
 long currentTime = 0;
 int duration = 0;
 
 //OLED Display
-#define SCREEN_WIDTH 128 // Breite des Displays in Pixeln
-#define SCREEN_HEIGHT 32 // Höhe des Displays in Pixeln
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
+Adafruit_SSD1306 display(-1);
 
 void getCurrentTime() {
 
   HTTPClient http;
-  http.begin("http://worldtimeapi.org/api/timezone/Europe/Berlin"); //URL zur Zeitabfrage
+  http.begin("http://worldtimeapi.org/api/timezone/Europe/Zurich"); //URL zur Zeitabfrage
   int httpCode = http.GET();
 
   if (httpCode == 200) { //Check for the returning code
@@ -108,7 +101,7 @@ void apiCall() {
 
   if ((WiFi.status() == WL_CONNECTED)) {
 
-    getCurrentTime(); //get the current time :)
+    getCurrentTime();
 
     HTTPClient http;
 
@@ -153,9 +146,9 @@ void apiCall() {
       Serial.println(flyoverTime);
 
       display.clearDisplay();
-      display.setCursor(35, 7);
+      display.setCursor(0, 7);
       display.println(flyoverDate);
-      display.setCursor(40, 23);
+      display.setCursor(0, 23);
       display.println(flyoverTime);
       display.display();
     }
@@ -168,14 +161,9 @@ void apiCall() {
 
 void setup() {
 
-  pinMode (12, OUTPUT); //LED Pin (on ESP8266 -> D6)
-
   Serial.begin(115200);
 
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { //Display address: 0x3C
-    Serial.println(F("SSD1306 allocation failed"));
-    for (;;);
-  }
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  
 
   display.setTextSize(1);
   display.setTextColor(WHITE);
@@ -186,9 +174,8 @@ void setup() {
     delay(1000);
     display.clearDisplay();
     display.setCursor(0, 10);
-    display.println("Connecting to WiFi...");
+    display.println("Connecting to WiFi  ...");
     display.display();
-
   }
 
   delay(1000);
@@ -210,7 +197,7 @@ void loop() {
     Serial.println(currentTime);
 
     if ((riseTime - currentTime) <= 60 && riseTime > currentTime) {
-      digitalWrite(12, HIGH);
+//      digitalWrite(12, HIGH);
     }
   }
   if (riseTime == currentTime) {
@@ -222,6 +209,6 @@ void loop() {
       display.display();
       delay(1000);
     }
-    digitalWrite(12, LOW);
+//    digitalWrite(12, LOW);
   }
 }
